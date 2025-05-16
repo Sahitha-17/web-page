@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz and Weather App</title>
+  <style>
+    body {
+      background: #1e1e1e;
+      font-family: Arial, sans-serif;
+      color: white;
+      padding: 20px;
+    }
+    h1 {
+      color: cyan;
+      text-align: center;
+    }
+    .card {
+      background: #2e2e2e;
+      padding: 20px;
+      margin: 20px auto;
+      border-radius: 10px;
+      max-width: 600px;
+    }
+    .question {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .options button {
+      display: block;
+      background: #444;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      width: 100%;
+      cursor: pointer;
+    }
+    .options button:hover {
+      background: #555;
+    }
+    .btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #00bcd4;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      width: 80%;
+    }
+    #weatherResult {
+      margin-top: 15px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Responsive Quiz & Weather Checker</h1>
+
+<div class="card">
+  <h2>JavaScript Quiz</h2>
+  <div class="question" id="questionText">Loading...</div>
+  <div class="options" id="optionsContainer"></div>
+  <button class="btn" onclick="nextQuestion()">Next</button>
+  <div id="scoreDisplay"></div>
+</div>
+
+<div class="card">
+  <h2>Weather Checker</h2>
+  <input type="text" id="cityInput" placeholder="Enter City Name" />
+  <button class="btn" onclick="getWeather()">Get Weather</button>
+  <div id="weatherResult"></div>
+</div>
+
+<script>
+  // QUIZ
+  const questions = [
+    {
+      question: "What does HTML stand for?",
+      options: ["HyperText Markup Language", "HyperText Markdown Language", "Home Tool Markup Language"],
+      answer: "HyperText Markup Language"
+    },
+    {
+      question: "Which is used for responsive web design?",
+      options: ["Media Queries", "CSS Grid", "Flexbox"],
+      answer: "Media Queries"
+    },
+    {
+      question: "Which language is used for styling web pages?",
+      options: ["HTML", "CSS", "JavaScript"],
+      answer: "CSS"
+    }
+  ];
+
+  let currentIndex = 0;
+  let score = 0;
+
+  function loadQuestion() {
+    const q = questions[currentIndex];
+    document.getElementById("questionText").textContent = q.question;
+    const optionsDiv = document.getElementById("optionsContainer");
+    optionsDiv.innerHTML = "";
+    q.options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.textContent = opt;
+      btn.onclick = () => {
+        if (opt === q.answer) {
+          score++;
+          btn.style.backgroundColor = "green";
+        } else {
+          btn.style.backgroundColor = "red";
+        }
+        document.querySelectorAll("#optionsContainer button").forEach(b => b.disabled = true);
+        document.getElementById("scoreDisplay").textContent = `Score: ${score}/${questions.length}`;
+      };
+      optionsDiv.appendChild(btn);
+    });
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) {
+      currentIndex++;
+      loadQuestion();
+    } else {
+      document.getElementById("questionText").textContent = "Quiz completed!";
+      document.getElementById("optionsContainer").innerHTML = "";
+      document.getElementById("scoreDisplay").textContent = `Final Score: ${score}/${questions.length}`;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadQuestion);
+
+  // WEATHER
+  async function getWeather() {
+    const city = document.getElementById("cityInput").value;
+    const apiKey = "YOUR_API_KEY"; // Replace with your actual API key
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.cod === 200) {
+        const weather = data.weather[0].description;
+        const temp = data.main.temp;
+        document.getElementById("weatherResult").textContent =
+          `Weather in ${data.name}: ${weather}, Temperature: ${temp}°C`;
+      } else {
+        document.getElementById("weatherResult").textContent = "City not found.";
+      }
+    } catch (err) {
+      document.getElementById("weatherResult").textContent = "Error fetching weather.";
+    }
+  }
+</script>
+
+</body>
+</html>
